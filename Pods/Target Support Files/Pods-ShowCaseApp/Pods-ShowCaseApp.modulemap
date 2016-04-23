@@ -1,0 +1,6 @@
+framework module Pods_ShowCaseApp {
+  umbrella header "Pods-ShowCaseApp-umbrella.h"
+
+  export *
+  module * { export * }
+}
