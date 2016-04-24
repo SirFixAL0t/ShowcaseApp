@@ -17,6 +17,7 @@ class ImageStore {
         
         if let img = ImageStore.imageCache.objectForKey(imgUrl) as? UIImage {
             afterDownloadImage(img: img)
+            return
         }
         
         Alamofire.request(.GET, imgUrl).validate(contentType: ["image/*"]).response(completionHandler: { request, response, data, error in

@@ -8,7 +8,7 @@
 
 import UIKit
 import Firebase
-class ProfileVC: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class ProfileVC: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UITextFieldDelegate {
 
     @IBOutlet weak var usernameField: UITextField!
     @IBOutlet weak var userImage: UIImageView!
@@ -23,6 +23,7 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate, UIImagePicker
         // Do any additional setup after loading the view.
         imagePicker.delegate = self
         userRef = DataService.ds.REF_USER_CURRENT
+        usernameField.delegate = self
         
         populateUsername()
         populateImage()
@@ -41,6 +42,11 @@ class ProfileVC: UIViewController, UINavigationControllerDelegate, UIImagePicker
                 }
             }
         })
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        usernameField.endEditing(true)
+        return true
     }
     
     func populateUsername() {

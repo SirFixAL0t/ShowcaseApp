@@ -10,7 +10,7 @@ import UIKit
 import Alamofire
 import Firebase
 
-class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
+class PostCell: UITableViewCell {
     
     @IBOutlet weak var profileImg: UIImageView!
     @IBOutlet weak var showcaseImg: UIImageView!
@@ -18,8 +18,7 @@ class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var descriptionText: UITextView!
     @IBOutlet weak var heartImg: UIImageView!
     @IBOutlet weak var usernameLbl: UILabel!
-    @IBOutlet weak var commentTableView: UITableView!
-    @IBOutlet weak var commentField: UITextField!
+    @IBOutlet weak var commentsLbl: UILabel!
     @IBOutlet weak var editPostBtn: UIButton!
     
     var post: Post!
@@ -27,7 +26,7 @@ class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
     var likeRef: Firebase!
     var user: User!
     var parentVC: UIViewController!
-    var comments = [Comment]()
+
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -37,21 +36,8 @@ class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
         
         heartImg.addGestureRecognizer(tap)
         heartImg.userInteractionEnabled = true
-        
-        commentTableView.delegate = self
-        commentTableView.dataSource = self
-        
-        toggleCommentSection()
     }
     
-    func toggleCommentSection(){
-        self.commentTableView.reloadData()
-        if comments.count > 0 {
-            commentTableView.hidden = false
-        } else {
-            commentTableView.hidden = true
-        }
-    }
     
     override func drawRect(rect: CGRect) {
         showcaseImg.clipsToBounds = true
@@ -60,6 +46,8 @@ class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
     func hideEditButton(){
         if post.userId != NSUserDefaults.standardUserDefaults().stringForKey(KEY_UID)! {
             editPostBtn.hidden = true
+        } else {
+            editPostBtn.hidden = false
         }
     }
     
@@ -67,13 +55,12 @@ class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
         
         self.post = post
         
-        hideEditButton()
-        
         likeRef = DataService.ds.REF_USER_CURRENT.childByAppendingPath("likes").childByAppendingPath(post.postKey)
 
         if let imgUrl = post.imageUrl {
             ImageStore.downloadImage(imgUrl, afterDownloadImage: { image in
                 self.showcaseImg.image = image
+                self.showcaseImg.hidden = false
             })
         } else {
             self.showcaseImg.hidden = true
@@ -85,15 +72,19 @@ class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
         parseLikes()
         setUserProfile()
         
-        comments = []
-        for comment in post.comments {
-            DataService.ds.REF_COMMENTS.childByAppendingPath(comment).observeSingleEventOfType(.Value, withBlock: { (snapshot) in
-                if let data = snapshot.value as? Dictionary<String, AnyObject>{
-                    self.comments.append(Comment(key: comment, data: data))
-                    self.toggleCommentSection()
-                }
-            })
-        }
+        commentsLbl.text = "\(post.comments.count) comments"
+        enableCommentsLink()
+        hideEditButton()
+    }
+    
+    func enableCommentsLink() {
+        let tapRecognirzer = UITapGestureRecognizer(target: self, action: #selector(PostCell.viewPost(_:)))
+        commentsLbl.addGestureRecognizer(tapRecognirzer)
+        commentsLbl.userInteractionEnabled = true
+    }
+    
+    func viewPost(tap: UITapGestureRecognizer) {
+        parentVC.performSegueWithIdentifier("ViewPost", sender: post)
     }
     
     func parseLikes() {
@@ -143,50 +134,8 @@ class PostCell: UITableViewCell, UITableViewDelegate, UITableViewDataSource {
         })
     }
     
-    @IBAction func postComment(sender: UIButton!) {
-        if let message = commentField.text where message != ""{
-            let newComment = DataService.ds.REF_COMMENTS.childByAutoId()
-            let messageArr: Dictionary<String, AnyObject> = [
-                "comment": message,
-                "owner": NSUserDefaults.standardUserDefaults().stringForKey(KEY_UID)!,
-                "post": post.postKey,
-                "timestamp": NSDate().timeIntervalSince1970
-            ]
-            
-            newComment.setValue(messageArr)
-            
-            newComment.observeSingleEventOfType(.Value, withBlock: { (snapshot) in
-                if let commentId = snapshot.key {
-                    self.post.postRef.childByAppendingPath("comments").childByAppendingPath(commentId).setValue(true)
-                    DataService.ds.REF_USER_CURRENT.childByAppendingPath("comments").childByAppendingPath(commentId).setValue(true)
-                    
-                    self.commentField.text = ""
-                }
-            })
-        }
-    }
-    
+        
     @IBAction func editPost(sender: UIButton) {
         parentVC.performSegueWithIdentifier("EditPost", sender: post.postRef)
     }
-    
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return comments.count
-    }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-
-        let comment = comments[indexPath.row]
-        
-        if let cell = tableView.dequeueReusableCellWithIdentifier("CommentCell") as? CommentCell {
-            cell.configureCell(comment)
-            return cell
-        }
-        return CommentCell()
-    }
-    
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
-    }
-
 }

@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class EditPostVC: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class EditPostVC: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UITextViewDelegate {
     
     @IBOutlet weak var postText: UITextView!
     @IBOutlet weak var postImage: UIImageView!
@@ -24,6 +24,7 @@ class EditPostVC: UIViewController, UINavigationControllerDelegate, UIImagePicke
         // Do any additional setup after loading the view.
         imagePicker = UIImagePickerController()
         imagePicker.delegate = self
+        postText.delegate = self
         
         postRef.observeSingleEventOfType(.Value, withBlock: { (snapshot) in
             if let data = snapshot.value {
@@ -41,7 +42,14 @@ class EditPostVC: UIViewController, UINavigationControllerDelegate, UIImagePicke
                 }
             }
         })
-
+    }
+    
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n" {
+            postText.endEditing(true)
+            return false
+        }
+        return true
     }
 
     
@@ -57,6 +65,7 @@ class EditPostVC: UIViewController, UINavigationControllerDelegate, UIImagePicke
         if let image = uploadImage {
             ImageStore.uploadImage(image, afterUploadImage: {
                 (img) in
+                    self.postRef.childByAppendingPath("imageUrl").setValue(img)
                     self.navigationController?.popViewControllerAnimated(true)
             })
         } else {
@@ -79,12 +88,29 @@ class EditPostVC: UIViewController, UINavigationControllerDelegate, UIImagePicke
         
         deleteAlert.addAction(UIAlertAction(title: "Yes, Delete", style: .Default, handler: {
             (action: UIAlertAction!) in
-                print("accepted")
+            
+            self.postRef.childByAppendingPath("comments").observeSingleEventOfType(.Value, withBlock: { (snapshot) in
+                if let comments = snapshot.children.allObjects as? [FDataSnapshot] {
+                    for comment in comments {
+                        DataService.ds.REF_COMMENTS.childByAppendingPath(comment.key).observeSingleEventOfType(.Value, withBlock: { (snapshot) in
+                            if let commentData = snapshot.value as? Dictionary<String, AnyObject> {
+                                if let userId = commentData["owner"] as? String {
+                                    DataService.ds.REF_USERS.childByAppendingPath(userId).childByAppendingPath("comments").childByAppendingPath(comment.key).removeValue()
+                                }
+                            }
+                        })
+                        DataService.ds.REF_COMMENTS.childByAppendingPath(comment.key).removeValue()
+                    }
+                }
+            })
+            
+            self.postRef.removeValue()
+            self.navigationController?.popViewControllerAnimated(true)
+            
         }))
         
         deleteAlert.addAction(UIAlertAction(title: "No, Wait!", style: .Cancel, handler: {
             (action: UIAlertAction!) in
-            print("rejected")
         }))
         
         presentViewController(deleteAlert, animated: true, completion: nil)

@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import Alamofire
 
-class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var postField: MaterialTextField!
@@ -26,14 +26,14 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
 
         tableView.delegate = self
         tableView.dataSource = self
-
+        postField.delegate = self
 
         tableView.estimatedRowHeight = 600
         
         imagePicker = UIImagePickerController()
         imagePicker.delegate = self
         
-        DataService.ds.REF_POSTS.queryOrderedByKey().observeEventType(.Value, withBlock: { snapshot in
+        DataService.ds.REF_POSTS.observeEventType(.Value, withBlock: { snapshot in
             self.posts = []
             if let snapshots = snapshot.children.allObjects as? [FDataSnapshot] {
                 for snap in snapshots.reverse() {
@@ -50,11 +50,16 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
     }
     
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        postField.endEditing(true)
+        return true
+    }
+    
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         let post = posts[indexPath.row]
         
         if post.imageUrl == nil {
-            return 400
+            return 300
         } else {
             return tableView.estimatedRowHeight
         }
@@ -80,6 +85,13 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
         
         return PostCell()
     }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        print("Did select row")
+        let post = posts[indexPath.row]
+        performSegueWithIdentifier("ViewPost", sender: post)
+    }
+    
     @IBAction func selectImage(sender: UITapGestureRecognizer) {
         presentViewController(imagePicker, animated: true, completion: nil)
     }
@@ -146,6 +158,13 @@ class FeedVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIIm
             if let postRef = sender as? Firebase {
                 let target = segue.destinationViewController as! EditPostVC
                 target.postRef = postRef
+            }
+        }
+        
+        if segue.identifier == "ViewPost" {
+            if let post = sender as? Post {
+                let target = segue.destinationViewController as! ViewPostVC
+                target.post = post
             }
         }
     }

@@ -34,6 +34,7 @@
 		8F4BCDE11CCA82D700D471BE /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4BCDE01CCA82D700D471BE /* Comment.swift */; };
 		8F4BCDE31CCA83A300D471BE /* CommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4BCDE21CCA83A300D471BE /* CommentCell.swift */; };
 		8F4BCDE51CCB17BA00D471BE /* EditPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4BCDE41CCB17BA00D471BE /* EditPostVC.swift */; };
+		8F4BCDE71CCC36EC00D471BE /* ViewPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4BCDE61CCC36EC00D471BE /* ViewPostVC.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +68,7 @@
 		8F4BCDE01CCA82D700D471BE /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
 		8F4BCDE21CCA83A300D471BE /* CommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentCell.swift; sourceTree = "<group>"; };
 		8F4BCDE41CCB17BA00D471BE /* EditPostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditPostVC.swift; sourceTree = "<group>"; };
+		8F4BCDE61CCC36EC00D471BE /* ViewPostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewPostVC.swift; sourceTree = "<group>"; };
 		DC3C853DB8F87935365BBB68 /* Pods-ShowCaseApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShowCaseApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ShowCaseApp/Pods-ShowCaseApp.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,6 +143,7 @@
 				8F4BCDD41CC9D54900D471BE /* ProfileVC.swift */,
 				8F4BCDDE1CCA82A500D471BE /* CommentVC.swift */,
 				8F4BCDE41CCB17BA00D471BE /* EditPostVC.swift */,
+				8F4BCDE61CCC36EC00D471BE /* ViewPostVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -343,6 +346,7 @@
 				8F4BCDC41CC2D73200D471BE /* MaterialButton.swift in Sources */,
 				8F4BCDE51CCB17BA00D471BE /* EditPostVC.swift in Sources */,
 				8F4BCDCF1CC586B800D471BE /* Post.swift in Sources */,
+				8F4BCDE71CCC36EC00D471BE /* ViewPostVC.swift in Sources */,
 				8F4BCDD31CC8426A00D471BE /* ImageStore.swift in Sources */,
 				8F4BCDD11CC8381E00D471BE /* User.swift in Sources */,
 			);
